@@ -1,0 +1,18 @@
+
+def get_dois(wt):
+    """get_dois.
+    Parses DOIs from a WikiText object.
+
+    :param wt: WikiText object
+    """
+    lines = get_wiki_lines(wt, predicate=any)
+    return [doi.find_doi_in_text(l) for l in lines]
+
+def get_arxivs(wt):
+    """get_arxivs.
+    Uses regex matching to extract ArXiv IDs from a WikiText object.
+
+    :param wt: WikiText object
+    """
+    lines = get_wiki_lines(wt, predicate=any)
+    return [arxiv_url_regex.matches(l).group(1) for l in lines]
