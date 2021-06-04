@@ -1,0 +1,7 @@
+reference_section_regexes:
+  - .*references.*
+  - .*further.*reading
+  - .*publications.*
+citation_templates:
+  - Template:Doi
+  - Template:Arxiv
