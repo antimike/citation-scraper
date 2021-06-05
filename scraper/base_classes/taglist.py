@@ -1,5 +1,9 @@
-from ..utils import clean_string
+"""Class for trimming, processing, and formatting lists of tags"""
+
+from __future__ import annotations
+from scraper.utils import clean_string
 from typing import Union, Iterable, Set
+
 
 class TagList:
     """
@@ -53,10 +57,24 @@ class TagList:
         """
         tag = tag.strip()
         allowed_chars = {
-            r'\?', r'!', r'\>', r'\<', r'\/', r'\\', r'#', r'\+', r'\*', r'@', r':', r'\(', r'\)', r'\[', r'\]'
+            r"\?",
+            r"!",
+            r"\>",
+            r"\<",
+            r"\/",
+            r"\\",
+            r"#",
+            r"\+",
+            r"\*",
+            r"@",
+            r":",
+            r"\(",
+            r"\)",
+            r"\[",
+            r"\]",
         }
         kwargs = {c: c for c in allowed_chars}
-        return clean_string(tag, default_replacement='-', **kwargs)
+        return clean_string(tag, default_replacement="-", **kwargs)
 
     @classmethod
     def _consolidate_tags(cls: TagList, tags: Union[str, Iterable[str]]) -> Set[str]:
@@ -75,7 +93,8 @@ class TagList:
         try:
             return set(map(cls.clean_tag, tags.split()))
         except AttributeError:
-            return set.union(*[cls._consolidate_tags(item) for item in tags])
+            tagsets = [cls._consolidate_tags(item) for item in tags] if len(tags) else [set()]
+            return set.union(*tagsets)
 
     def __init__(self, *tagstrings) -> None:
         self._tags = set.union(*map(self.__class__._consolidate_tags, tagstrings))
@@ -87,7 +106,7 @@ class TagList:
         return self.__class__(self._tags.difference(self.__class__(other)._tags))
 
     def __str__(self):
-        return ' '.join(self._tags)
+        return " ".join(self._tags)
 
     def __iter__(self):
         return iter(self._tags)

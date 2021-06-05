@@ -1,14 +1,16 @@
+"""Module for working with documents identified by download URL"""
+
 import scihub
 from operator import itemgetter
-from . import DocumentType
-from .. import Constants
-from ..utils import sanitize_filename, get_title_as_filename
+from scraper.base_classes.document import Document, DocumentType
+from scraper import Constants
+from scraper.utils import sanitize_filename, get_title_as_filename
 from typing import Optional, Collection
 from urllib.parse import urlsplit, urlunsplit, SplitResult
 from validators import url as valid_total_url
 
-class UrlDoc(DocumentType):
 
+class UrlDoc(DocumentType):
     @classmethod
     def validate(cls: DocumentType, doc_id: str) -> Optional[str]:
         """{{{
@@ -26,7 +28,13 @@ class UrlDoc(DocumentType):
 
         }}}
         }}}"""
-        defaults = {'scheme': 'https', 'netloc': None, 'path': None, 'query': None, 'fragment': None}
+        defaults = {
+            "scheme": "https",
+            "netloc": None,
+            "path": None,
+            "query": None,
+            "fragment": None,
+        }
         split_url = {
             k: (defaults.get(k) or v) for k, v in urlsplit(doc_id)._asdict().items()
         }
@@ -38,7 +46,13 @@ class UrlDoc(DocumentType):
             return None
 
     @classmethod
-    def download(cls: DocumentType, doc_id: str, outdir=Constants.DOWNLOAD_DIR, fname=None, **kwargs) -> Collection[str]:
+    def download(
+        cls: DocumentType,
+        doc_id: str,
+        outdir=Constants.DOWNLOAD_DIR,
+        fname=None,
+        **kwargs,
+    ) -> Collection[str]:
         """{{{
         Downloads paper based on URL, Arxiv ID, or DOI
 
@@ -53,9 +67,9 @@ class UrlDoc(DocumentType):
 
         }}}
         }}}"""
-        pdf, url = itemgetter('pdf', 'url')(scihub.SciHub().fetch(doc_id))
+        pdf, url = itemgetter("pdf", "url")(scihub.SciHub().fetch(doc_id))
         fname = sanitize_filename(fname) or get_title_as_filename(pdf)
-        path = f'{outdir}/{fname}'
-        with open(path, 'xb') as fptr:
+        path = f"{outdir}/{fname}"
+        with open(path, "xb") as fptr:
             fptr.write(pdf)
         return path

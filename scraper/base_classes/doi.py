@@ -1,13 +1,15 @@
+"""Module for working with documents identified by a DOI"""
+
+from __future__ import annotations
 import doi
-from .. import Constants
-from . import DocumentType
-from . import Document
-from typing import Optional, Collection
-from scidownl import scidownl
 import glob
+from scidownl import scidownl
+from typing import Optional, Collection
+from scraper import Constants
+from scraper.base_classes.document import Document, DocumentType
+
 
 class Doi(DocumentType):
-
     @classmethod
     def validate(cls: Doi, doc_id: str) -> Optional[str]:
         """{{{
@@ -32,7 +34,9 @@ class Doi(DocumentType):
             return None
 
     @classmethod
-    def download(cls: Doi, doc_id: str, outdir=Constants.DOWNLOAD_DIR, **kwargs) -> Collection[str]:
+    def download(
+        cls: Doi, doc_id: str, outdir=Constants.DOWNLOAD_DIR, **kwargs
+    ) -> Collection[str]:
         """{{{
         Downloads paper with given DOI to specified directory
 
@@ -57,7 +61,7 @@ class Doi(DocumentType):
         }}}
         }}}"""
         scidownl.SciHub(doc_id, outdir).download(1)
-        return glob.glob(f'{outdir}/*.pdf')
+        return glob.glob(f"{outdir}/*.pdf")
 
     @classmethod
     def run(cls: Doi, doc: Document) -> None:
