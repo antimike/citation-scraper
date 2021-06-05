@@ -1,33 +1,25 @@
-
-#!/bin/env/python3
-
-from __future__ import annotations
-import logging
-import sys, os
-import glob
-import doi
-from scidownl import scidownl
-import json, yaml
-from crossref.restful import Works
-import scihub
-from papis import api as Papis
-from papis.commands.add import run as PapisAdd
-from papis.arxiv import Importer as ImportArxiv
-from papis.arxiv import find_arxivid_in_text, validate_arxivid
-from operator import itemgetter
-from enum import Enum, auto
-from typing import NamedTuple, Callable, Optional, Collection, Mapping, Any, Iterable, Union
-from abc import abstractmethod, ABC
-from urllib.parse import urlsplit, urlunsplit, SplitResult
-from validators import url as valid_total_url
+import time, re
 import pdftitle
-import time
-import re
+import logging
+from ..parsing import validate_and_parse_url
 
-works = Works()
-DOWNLOAD_DIR = '/home/user/Downloads'
-dois = [get_validated_doi(arg) for arg in sys.argv[1:]]
 logger = logging.getLogger()
+
+def get_wiki_page_id(string):
+    """get_wiki_page_id.
+    Gets a Wikipedia 'page ID' from the article's URL.
+    If the passed URL is invalid, simply returns the original string.
+
+    :param string: String to interpret as either a URL or search term
+    """
+    try:
+        parsed = validate_and_parse_url(string)
+        if 'wiki' not in parsed.netloc.lower():
+            raise ValueError("The URL {} does not appear to belong to a Wikipedia article".format(string))
+        ret = parsed.path.split(r'/')[-1]
+    except ValueError:
+        ret = string
+    return ret
 
 def get_datetime_string(format_string='%m:%d:%Y:%X'):
     """
@@ -100,38 +92,3 @@ def get_title_as_filename(file_id, extension='pdf', **kwargs):
         logger.warning('Failed to get title of PDF file "%s".  Exception: %s', file_id[:100], e)
         name = f'paper_{get_datetime_string()}.pdf'
     return sanitize_filename(name, extension=extension)
-
-def add_paper_from_doi(doc_id, *tags, confirm=True, link=False, **kwargs):
-    """
-    Fetches and adds a paper to Papis library from DOI
-
-    :param doc_id: DOI of paper to add
-    :param *tags: Tags to apply in Papis
-    :kw confirm: (Optional) Whether to confirm adding doc (default = True)
-    :kw link: (Optional) Whether to create symlink instead of copying PDF (default = False)
-    :param **kwargs: Properties to set in document's info.yaml file
-    """
-    data = get_consolidated_data_from_doi(doc_id) | {
-        'tags': ' '.join(tags)
-    } | kwargs
-    title = data.get('title')
-    subdir = get_title_as_filename(title, extension='pdf')
-    files = download_paper_from_doi(doc_id, outdir=f'{DOWNLOAD_DIR}/{subdir}')
-    PapisAdd(files, data, confirm=confirm, link=link)
-
-# def add_paper_from_url(url, *tags, confirm=True, link=False):
-# def download_paper(doc_id):
-
-
-def get_validated_doi_from_pdf(fpath):
-    return doi.pdf_to_doi(fpath)
-
-
-# from papis.commands.add import run as PapisAdd
-"""
-# Physics
-
-* stat-mech
-    * fermions
-        * chandresekhar
-"""
