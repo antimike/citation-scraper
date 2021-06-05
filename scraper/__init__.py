@@ -1,4 +1,4 @@
-import scraper.apis
+# import scraper.apis
 import scraper.parsing
 from enum import Enum
 

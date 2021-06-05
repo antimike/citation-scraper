@@ -4,6 +4,3 @@ from .html import *
 from .markdown import *
 from .pywikibot import *
 from .string_helpers import *
-from .url import *
-from .wikitextparser import *
-from .wikitextparser import *
